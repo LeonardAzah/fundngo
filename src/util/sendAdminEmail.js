@@ -1,9 +1,8 @@
 const sendEmail = require("./sendEmail");
 const verifyEmail = require("../templates/mailTemplate");
 
-const sendVerificationEmail = async ({ name, email, otp }) => {
-  const message =
-    "A request to create your FundNgo account was received.Use the code below to confirm your account and log in";
+const sendAdminEmail = async ({ name, email, otp }) => {
+  const message = "Your account has been created at FundNgo  log in with";
 
   const emailTemplate = verifyEmail(otp, name, message);
 
@@ -14,4 +13,4 @@ const sendVerificationEmail = async ({ name, email, otp }) => {
   });
 };
 
-module.exports = sendVerificationEmail;
+module.exports = sendAdminEmail;

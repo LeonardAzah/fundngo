@@ -1,64 +1,71 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
 const bcrypt = require("bcryptjs");
 
-const organisationSchema = new Schema({
-  organizationName: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  phone: {
-    type: String,
-    required: true,
-  },
-  cac: {
-    type: String,
-    required: true,
-  },
-  areaOfIntreat: {
-    type: [{ type: String, required: true }],
-  },
-  country: {
-    type: String,
-    required: true,
-  },
-  state: {
-    type: String,
-    required: true,
-  },
-});
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Please provide name"],
-    minlength: 3,
-    maxlength: 50,
+    required: true,
   },
   email: {
     type: String,
     unique: true,
-    required: [true, "Please provide email"],
-    validate: {
-      validator: validator.isEmail,
-      message: "Please provide valid email",
-    },
+    required: true,
   },
   password: {
     type: String,
-    required: [true, "Please provide password"],
-    minlength: 6,
+    required: true,
   },
   role: {
     type: String,
-    enum: ["admin", "user"],
-    default: "user",
+    enum: ["admin", "donor", "ngo"],
+    default: "donor",
+  },
+  accountType: {
+    type: String,
+    enum: ["individual", "corporation", "ngo"],
+  },
+  phone: {
+    type: String,
+    required: function () {
+      return this.accountType === "ngo";
+    },
+  },
+
+  cac: {
+    type: String,
+    required: function () {
+      return this.accountType === "ngo";
+    },
+  },
+
+  country: {
+    type: String,
+    required: function () {
+      return this.accountType === "ngo";
+    },
+  },
+
+  state: {
+    type: String,
+    required: function () {
+      return this.accountType === "ngo";
+    },
+  },
+  areaOfIntrest: {
+    type: [String],
+    required: function () {
+      return this.accountType === "ngo";
+    },
   },
   otp: String,
+  passwordOtp: {
+    type: String,
+  },
   isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  isValidated: {
     type: Boolean,
     default: false,
   },
@@ -66,7 +73,6 @@ const UserSchema = new mongoose.Schema({
     type: Date,
   },
   verified: Date,
-  organisation: organisationSchema,
 });
 
 UserSchema.pre("save", async function () {

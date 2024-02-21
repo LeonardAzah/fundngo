@@ -7,6 +7,14 @@ const cors = require("cors");
 const fileUpload = require("express-fileupload");
 
 const connectDB = require("./config/db");
+const errorHandlerMiddleware = require("./middleware/error-handler");
+const notFound = require("./middleware/error-handler");
+const logger = require("./util/logger");
+
+const donorRoutes = require("./routes/donor.routes");
+const ngoRoutes = require("./routes/ngo.routes");
+const adminRoutes = require("./routes/admin.routes");
+const authRoutes = require("./routes/auth.routes");
 
 const app = express();
 
@@ -29,13 +37,21 @@ app.get("/", (req, res) => {
   res.send("fundngo");
 });
 
+app.use("/api/v1/donors", donorRoutes);
+app.use("/api/v1/ngos", ngoRoutes);
+app.use("/api/v1/admins", adminRoutes);
+app.use("/api/v1/", authRoutes);
+
+app.use(notFound);
+app.use(errorHandlerMiddleware);
+
 const port = process.env.PORT || 5000;
 
 const start = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
     app.listen(port, () =>
-      console.log(`Server is listening on port ${port}...`)
+      logger.info(`Server is listening on port ${port}...`)
     );
   } catch (error) {
     console.log(error);

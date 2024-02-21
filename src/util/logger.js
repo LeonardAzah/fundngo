@@ -10,4 +10,4 @@ const logger = pino({
   timestamp: () => `,"time":"${dayjs().format()}`,
 });
 
-export default logger;
+module.exports = logger;
