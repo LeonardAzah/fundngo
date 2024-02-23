@@ -49,7 +49,6 @@ const register = asyncHandler(async (req, res) => {
   });
 
   await sendVerificationEmail({
-    name: user.name,
     email: user.email,
     otp: otp,
   });

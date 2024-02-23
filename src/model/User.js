@@ -13,7 +13,6 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
   },
   role: {
     type: String,
@@ -56,6 +55,10 @@ const UserSchema = new mongoose.Schema({
     required: function () {
       return this.accountType === "ngo";
     },
+  },
+  googleId: { type: String },
+  photo: {
+    type: String,
   },
   otp: String,
   passwordOtp: {

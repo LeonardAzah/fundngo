@@ -99,7 +99,9 @@ const verifyEmail = function (otp, name, message) {
                           <td class="sm-px-24"
                             style="--bg-opacity: 1; background-color: #ffffff;  border-radius: 4px; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; line-height: 24px; padding: 48px; text-align: left; --text-opacity: 1; color: #626262;"
                              align="left">
-                            <p style="font-weight: 600; font-size: 18px; margin-bottom: 0;">Hey ${name},</p>
+                             <p style="font-weight: 600; font-size: 18px; margin-bottom: 0;">Hey ${
+                               name ? name : ""
+                             },</p>
   
                             <p style="margin: 0 0 24px;">
                             ${message}

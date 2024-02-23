@@ -41,13 +41,14 @@ const login = asyncHandler(async (req, res) => {
   if (!user) {
     throw new CustomError.UnauthenticatedError("Invalid Credentials");
   }
+  if (!user.isVerified) {
+    throw new CustomError.UnauthenticatedError("Please verify your email");
+  }
   const isPasswordCorrect = await user.comparePassword(password);
   if (!isPasswordCorrect) {
     throw new CustomError.UnauthenticatedError("Invalid Credentials");
   }
-  if (!user.isVerified) {
-    throw new CustomError.UnauthenticatedError("Please verify your email");
-  }
+
   const tokenUser = createTokenUser(user);
 
   //create refresh token
@@ -142,10 +143,46 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "Password Resetted!" });
 });
 
+const googleCallback = asyncHandler(async (req, res) => {
+  const user = await User.findOne({ _id: req.user._id });
+
+  if (!user) {
+    throw new CustomError.UnauthenticatedError("Invalid Credentials");
+  }
+  const tokenUser = createTokenUser(user);
+
+  //create refresh token
+  let refreshToken = "";
+
+  //check for existing tokens
+  const existingToken = await Token.findOne({ user: user._id });
+
+  if (existingToken) {
+    const { isValid } = existingToken;
+    if (!isValid) {
+      throw new CustomError.UnauthenticatedError("Invalid Credentials");
+    }
+    refreshToken = existingToken.refreshToken;
+    attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+    res.status(StatusCodes.OK).json({ user: tokenUser });
+    return;
+  }
+  refreshToken = crypto.randomBytes(40).toString("hex");
+  const userAgent = req.headers["user-agent"];
+  const ip = req.ip;
+  const userToken = { refreshToken, ip, userAgent, user: user._id };
+  await Token.create(userToken);
+
+  attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+
+  res.status(StatusCodes.OK).json({ user: tokenUser });
+});
+
 module.exports = {
   verifyEmail,
   login,
   logout,
   forgotPassword,
   resetPassword,
+  googleCallback,
 };

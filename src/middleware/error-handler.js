@@ -10,13 +10,11 @@ const errorHandlerMiddleware = (error, req, res, next) => {
     ErrorMessage: error.message,
     ErrorName: error.type,
   });
-  console.log(error);
 
   res.status(error.statusCode || 500).json({
     response: "Error",
     error: {
       type: customError === false ? "UnhandledError" : error.constructor.name,
-      // path: req.path,
       statusCode: error.statusCode || 500,
       message: error.message,
     },
