@@ -9,13 +9,32 @@ const {
   googleCallback,
 } = require("../controller/auth.controller");
 const { authenticateUser } = require("../middleware/authentication");
+const validateRequest = require("../middleware/validateRequest");
+const {
+  loginValidation,
+  verifyEmailValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation,
+} = require("../validators/auth.validate");
 const router = express.Router();
 
-router.post("/login", login);
-router.post("/verify-email", verifyEmail);
+router.post("/login", validateRequest(loginValidation), login);
+router.post(
+  "/verify-email",
+  validateRequest(verifyEmailValidation),
+  verifyEmail
+);
 router.delete("/logout", authenticateUser, logout);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
+router.post(
+  "/forgot-password",
+  validateRequest(forgotPasswordValidation),
+  forgotPassword
+);
+router.post(
+  "/reset-password",
+  validateRequest(resetPasswordValidation),
+  resetPassword
+);
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
