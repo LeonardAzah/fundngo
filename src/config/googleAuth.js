@@ -9,7 +9,7 @@ module.exports = (passport) => {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "http://localhost:5000/api/v1/google/callback",
+        callbackURL: "https://fundngo.onrender.com/api/v1/google/callback",
         passReqToCallback: true,
       },
       async function (request, accessToken, refreshToken, profile, done) {
