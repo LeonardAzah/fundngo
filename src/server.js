@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const passport = require("passport");
+const cloudinary = require("cloudinary").v2;
 
 const connectDB = require("./config/db");
 const errorHandlerMiddleware = require("./middleware/error-handler");
@@ -17,14 +18,9 @@ const donorRoutes = require("./routes/donor.routes");
 const ngoRoutes = require("./routes/ngo.routes");
 const adminRoutes = require("./routes/admin.routes");
 const authRoutes = require("./routes/auth.routes");
+const profileRoutes = require("./routes/profile.routes");
 
 const app = express();
-
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET,
-});
 
 app.set("trust proxy", 1);
 
@@ -43,6 +39,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/donors", donorRoutes);
+app.use("/api/v1/profiles", profileRoutes);
 app.use("/api/v1/ngos", ngoRoutes);
 app.use("/api/v1/admins", adminRoutes);
 app.use("/api/v1/", authRoutes);
