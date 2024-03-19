@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const profileSchema = new mongoose.Schema(
+const portfolioSchema = new mongoose.Schema(
   {
     mission: {
       type: String,
@@ -34,4 +34,4 @@ const profileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Profile", profileSchema);
+module.exports = mongoose.model("Portfolio", portfolioSchema);

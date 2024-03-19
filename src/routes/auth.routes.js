@@ -7,6 +7,7 @@ const {
   forgotPassword,
   resetPassword,
   googleCallback,
+  changePassword,
 } = require("../controller/auth.controller");
 const { authenticateUser } = require("../middleware/authentication");
 const validateRequest = require("../middleware/validateRequest");
@@ -35,6 +36,8 @@ router.post(
   validateRequest(resetPasswordValidation),
   resetPassword
 );
+
+router.post("/change-password", authenticateUser, changePassword);
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })

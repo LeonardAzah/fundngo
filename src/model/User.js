@@ -56,6 +56,9 @@ const UserSchema = new mongoose.Schema({
       return this.accountType === "ngo";
     },
   },
+  documents: {
+    type: [String],
+  },
   googleId: { type: String },
   photo: {
     type: String,
@@ -68,9 +71,13 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  isValidated: {
-    type: Boolean,
-    default: false,
+  status: {
+    type: String,
+    enum: ["waiting", "pending", "approved"],
+    default: "waiting",
+    required: function () {
+      return this.accountType === "ngo";
+    },
   },
   passwordTokenExpirationDate: {
     type: Date,
