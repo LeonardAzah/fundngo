@@ -1,10 +1,18 @@
 const mongoose = require("mongoose");
 
-const portfolioSchema = new mongoose.Schema(
+const projectSchema = new mongoose.Schema(
   {
+    title: {
+      type: String,
+    },
     mission: {
       type: String,
       required: true,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: false,
     },
 
     vision: {
@@ -14,22 +22,12 @@ const portfolioSchema = new mongoose.Schema(
 
     overview: {
       type: String,
-      required: true,
-    },
-    projects: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Project",
-      },
-    ],
-    url: {
-      type: String,
     },
     images: {
       type: [String],
     },
     user: {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
@@ -37,4 +35,4 @@ const portfolioSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Portfolio", portfolioSchema);
+module.exports = mongoose.model("Project", projectSchema);
