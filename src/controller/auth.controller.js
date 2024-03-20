@@ -1,15 +1,16 @@
 const User = require("../model/User");
+const Token = require("../model/Token");
 const asyncHandler = require("../util/asyncHandler");
 const CustomError = require("../error");
 const bcrypt = require("bcryptjs");
 const { StatusCodes } = require("http-status-codes");
 const createTokenUser = require("../util/createTokenUser");
-const Token = require("../model/Token");
 const { attachCookiesToResponse } = require("../util/jwt");
 const crypto = require("crypto");
 const otpGenerator = require("otp-generator");
 const sendResetPasswordEmail = require("../util/sendResetPasswordEmail");
 const createHash = require("../util/createHash");
+const sendChangePasswordEmail = require("../util/sendChangePasswordEmail");
 
 const verifyEmail = asyncHandler(async (req, res) => {
   const { otp, email } = req.body;
@@ -23,7 +24,6 @@ const verifyEmail = asyncHandler(async (req, res) => {
   if (!isOtpValid) {
     throw new CustomError.UnauthenticatedError("Verification Failed");
   }
-  user.isValidated = true;
   user.isVerified = true;
   user.verified = Date.now();
   user.otp = "";
@@ -143,6 +143,50 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "Password Resetted!" });
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const userId = req.user.userId;
+
+  const user = await User.findOne({ _id: userId });
+
+  if (!user) {
+    throw new CustomError.NotFoundError("User not found!");
+  }
+
+  const isPasswordCorrect = await user.comparePassword(oldPassword);
+
+  if (!isPasswordCorrect) {
+    throw new CustomError.UnauthenticatedError("Invalid Credentials");
+  }
+
+  user.password = newPassword;
+
+  await Token.findOneAndDelete({ user: userId });
+
+  const tokenUser = createTokenUser(user);
+
+  const refreshToken = crypto.randomBytes(40).toString("hex");
+  const userAgent = req.headers["user-agent"];
+  const ip = req.ip;
+  const userToken = { refreshToken, ip, userAgent, user: user._id };
+  await Token.create(userToken);
+
+  attachCookiesToResponse({ res, user: tokenUser, refreshToken });
+
+  await user.save();
+
+  await sendChangePasswordEmail({
+    name: user.name,
+    email: user.email,
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Password changed successfully",
+    user: tokenUser,
+  });
+});
+
 const googleCallback = asyncHandler(async (req, res) => {
   const user = await User.findOne({ _id: req.user._id });
 
@@ -184,5 +228,6 @@ module.exports = {
   logout,
   forgotPassword,
   resetPassword,
+  changePassword,
   googleCallback,
 };

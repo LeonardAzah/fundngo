@@ -1,11 +1,8 @@
 require("dotenv").config();
 const express = require("express");
-// const passport = require("passport");
 
-const cloudinary = require("cloudinary").v2;
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const fileUpload = require("express-fileupload");
 const passport = require("passport");
 
 const connectDB = require("./config/db");
@@ -17,14 +14,10 @@ const donorRoutes = require("./routes/donor.routes");
 const ngoRoutes = require("./routes/ngo.routes");
 const adminRoutes = require("./routes/admin.routes");
 const authRoutes = require("./routes/auth.routes");
+const portfolioRoutes = require("./routes/portfolios.routes");
+const projectRoutes = require("./routes/project.routes");
 
 const app = express();
-
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET,
-});
 
 app.set("trust proxy", 1);
 
@@ -33,7 +26,6 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 app.use(express.static("./public"));
-app.use(fileUpload({ useTempFiles: true }));
 app.use(passport.initialize());
 require("./config/googleAuth")(passport);
 
@@ -43,6 +35,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/donors", donorRoutes);
+app.use("/api/v1/portfolios", portfolioRoutes);
+app.use("/api/v1/projects", projectRoutes);
 app.use("/api/v1/ngos", ngoRoutes);
 app.use("/api/v1/admins", adminRoutes);
 app.use("/api/v1/", authRoutes);
