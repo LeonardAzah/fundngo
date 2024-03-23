@@ -3,7 +3,7 @@ const asyncHandler = require("../util/asyncHandler");
 const StatusCodes = require("http-status-codes");
 const paginate = require("../util/paginate");
 const CustomError = require("../error");
-const Account = require("../model/Account");
+const Donation = require("../model/Donation");
 const checkPermissions = require("../util/checkPermissions");
 const User = require("../model/User");
 
@@ -15,7 +15,7 @@ const createProject = asyncHandler(async (req, res) => {
   const project = new Project(req.body);
   await project.save();
 
-  await Account.create({ project: project._id });
+  // await Donation.create({ project: project._id });
 
   res.status(StatusCodes.CREATED).json({
     success: true,
@@ -32,7 +32,7 @@ const getAllProjects = asyncHandler(async (req, res) => {
     {
       model: "User",
       path: "user",
-      select: "name  photo areaOfIntrest country",
+      select: "_id name  photo areaOfIntrest country",
     },
   ];
   const projects = await paginate({

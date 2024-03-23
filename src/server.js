@@ -16,6 +16,8 @@ const adminRoutes = require("./routes/admin.routes");
 const authRoutes = require("./routes/auth.routes");
 const portfolioRoutes = require("./routes/portfolios.routes");
 const projectRoutes = require("./routes/project.routes");
+const donationRoutes = require("./routes/donation.routes");
+const cardRoutes = require("./routes/card.routes");
 
 const app = express();
 
@@ -37,6 +39,8 @@ app.get("/", (req, res) => {
 app.use("/api/v1/donors", donorRoutes);
 app.use("/api/v1/portfolios", portfolioRoutes);
 app.use("/api/v1/projects", projectRoutes);
+app.use("/api/v1/donations", donationRoutes);
+app.use("/api/v1/cards", donationRoutes);
 app.use("/api/v1/ngos", ngoRoutes);
 app.use("/api/v1/admins", adminRoutes);
 app.use("/api/v1/", authRoutes);

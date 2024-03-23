@@ -14,7 +14,8 @@ const projectSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
+    targetAmount: Number,
+    currentAmount: { type: Number, default: 0 },
     vision: {
       type: String,
       required: true,
