@@ -40,7 +40,7 @@ app.use("/api/v1/donors", donorRoutes);
 app.use("/api/v1/portfolios", portfolioRoutes);
 app.use("/api/v1/projects", projectRoutes);
 app.use("/api/v1/donations", donationRoutes);
-app.use("/api/v1/cards", donationRoutes);
+app.use("/api/v1/cards", cardRoutes);
 app.use("/api/v1/ngos", ngoRoutes);
 app.use("/api/v1/admins", adminRoutes);
 app.use("/api/v1/", authRoutes);

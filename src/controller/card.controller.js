@@ -10,12 +10,6 @@ const createCard = asyncHandler(async (req, res) => {
   const { userId } = req.user;
   const { cardName, cardno, expiryDate, cvv, cardProvider } = req.body;
 
-  //check if user has existing card
-  const cardExist = await Card.findOne({ user: userId });
-  if (cardExist) {
-    cardExist.isActive = false;
-    cardExist.save();
-  }
   const card = await Card.create({
     cardName,
     cardno,
@@ -122,7 +116,7 @@ const updateCard = asyncHandler(async (req, res) => {
 
   checkPermissions(user, card.user);
 
-  const updatedcard = Card.findByIdAndUpdate({ _id: cardId }, req.body, {
+  const updatedcard = await Card.findByIdAndUpdate({ _id: cardId }, req.body, {
     new: true,
   });
 
@@ -133,13 +127,45 @@ const updateCard = asyncHandler(async (req, res) => {
   });
 });
 
+const activateCard = asyncHandler(async (req, res) => {
+  const cardId = req.params.id;
+  const { userId } = req.user;
+  const [user, card] = await Promise.all([
+    User.findById(userId),
+    Card.findById(cardId),
+  ]);
+
+  if (!user) {
+    throw new CustomError.NotFoundError("User not found");
+  }
+  if (!card) {
+    throw new CustomError.NotFoundError("Card not found");
+  }
+
+  checkPermissions(user, card.user);
+  const updates = {
+    isActive: true,
+  };
+  await Card.findByIdAndUpdate({ _id: cardId }, updates, {
+    new: true,
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Card activated sucessfully",
+  });
+});
+
 const deleteCard = asyncHandler(async (req, res) => {
   const cardId = req.params.id;
+  const { userId } = req.user;
   const card = await Card.findOneAndDelete({ _id: cardId });
 
   if (!card) {
     throw new CustomError.NotFoundError("Card not found");
   }
+
+  await Card.updateMany({ user: userId }, { $set: { isActive: true } });
 
   res.status(StatusCodes.NO_CONTENT).json({
     success: true,
@@ -154,4 +180,5 @@ module.exports = {
   getCardById,
   updateCard,
   deleteCard,
+  activateCard,
 };

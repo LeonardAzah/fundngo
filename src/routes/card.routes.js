@@ -17,7 +17,7 @@ router.post(
 router.get(
   "/all",
   authenticateUser,
-  authorizePermissions("ngo"),
+  authorizePermissions("admin"),
   cardController.getAllCards
 );
 
@@ -38,21 +38,27 @@ router.get(
 router.patch(
   "/:id",
   authenticateUser,
-  authorizePermissions("admin"),
+  authorizePermissions("ngo", "admin"),
   cardController.updateCard
+);
+router.post(
+  "/activate/:id",
+  authenticateUser,
+  authorizePermissions("ngo"),
+  cardController.activateCard
 );
 
 router.delete(
   "/:id",
   authenticateUser,
-  authorizePermissions("admin"),
+  authorizePermissions("ngo"),
   cardController.deleteCard
 );
 
 router.get(
   "/:id",
   authenticateUser,
-  authorizePermissions(["ngo", "admin"]),
+  authorizePermissions("ngo", "admin"),
   cardController.getCardById
 );
 
