@@ -59,6 +59,7 @@ const UserSchema = new mongoose.Schema({
   documents: {
     type: [String],
   },
+
   googleId: { type: String },
   photo: {
     type: String,
