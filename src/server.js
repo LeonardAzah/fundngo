@@ -17,6 +17,7 @@ const authRoutes = require("./routes/auth.routes");
 const portfolioRoutes = require("./routes/portfolios.routes");
 const cardRoutes = require("./routes/card.routes");
 const donationRoutes = require("./routes/donation.routes");
+const paymentRoutes = require("./routes/payment.routes");
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use("/api/v1/cards", cardRoutes);
 app.use("/api/v1/ngos", ngoRoutes);
 app.use("/api/v1/admins", adminRoutes);
 app.use("/api/v1/", authRoutes);
+app.use("/api/v1/payments", paymentRoutes);
 
 app.use(notFound);
 app.use(errorHandlerMiddleware);
