@@ -1,5 +1,6 @@
 const asyncHandler = require("../util/asyncHandler");
 const User = require("../model/User");
+const Account = require("../model/Account");
 const CustomError = require("../error");
 const otpGenerator = require("otp-generator");
 const sendVerificationEmail = require("../util/sendVerificationEmail");
@@ -49,8 +50,10 @@ const register = asyncHandler(async (req, res) => {
     state,
     role: "ngo",
   });
-
-  await sendVerificationEmail({
+  await Account.create({
+    ngo: user._id,
+  });
+  await await sendVerificationEmail({
     email: user.email,
     otp: otp,
   });
