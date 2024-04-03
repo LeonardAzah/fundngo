@@ -1,45 +1,91 @@
 const Donation = require("../model/Donation");
 const User = require("../model/User");
 const Account = require("../model/Account");
-const PaymentTransaction = require("../model/PaymentTranscation");
 const asyncHandler = require("../util/asyncHandler");
 const StatusCodes = require("http-status-codes");
 const paginate = require("../util/paginate");
 const CustomError = require("../error");
+const paystack = require("../config/paystack");
 
 const createDonation = asyncHandler(async (req, res) => {
   const ngoId = req.params.id;
+  const { userId } = req.user;
   const ngo = await User.findById(ngoId);
+  let amount = req.body.amount;
   if (!ngo) {
     throw new CustomError.NotFoundError("NGO not found");
   }
-  const donation = new Donation(req.body);
-  await donation.save();
+  req.body.ngo = ngoId;
+  let donation;
 
-  //   process payment with flutterwave or paystack
-  //     const charge = await stripe.charges.create({
-  //       amount: amount * 100, // Stripe requires amount in cents
-  //       currency: 'usd',
-  //       description: `Donation to ${project.title}`,
-  //       source: token, // Token from Stripe checkout
-  //     });
+  if (userId) {
+    req.body.user = userId;
+    donation = new Donation(req.body);
+    await donation.save();
+  } else {
+    donation = new Donation(req.body);
+    await donation.save();
+  }
 
-  // save payment transcation
-  const paymentTransaction = new PaymentTransaction({
-    amount: donation.amount,
-    donorEmail: donation.donorEmail,
-    // paymentId: charge.id,
+  //   process payment with paystack
+  amount *= 100;
+  const response = await paystack.transaction.initialize({
+    amount: amount,
+    email: req.body.email,
   });
-  await paymentTransaction.save();
 
-  await Account.findOneAndUpdate(
-    { _id: ngo._id },
-    { $inc: { currentAmount: amount } },
-    { new: true }
-  );
+  const data = {
+    paystack_ref: response.data.reference,
+  };
+
+  await Donation.findByIdAndUpdate(donation._id, data);
+
+  const result = {
+    donation,
+    response,
+  };
+
   res.status(StatusCodes.CREATED).json({
     success: true,
     message: "Donation created sucessfully",
+    data: result,
+  });
+});
+
+const verifyTrans = asyncHandler(async (req, res) => {
+  const donationId = req.params.id;
+
+  const donation = await Donation.findById(donationId);
+
+  if (!donation) {
+    throw new CustomError.NotFoundError("Donation not found");
+  }
+
+  const response = await paystack.transaction.verify({
+    reference: donation.paystack_ref,
+  });
+
+  if (response.data.status != "success") {
+    CustomError.CustomAPIError(
+      "Payment failed",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+  const data = {
+    paystack_ref: response.data.status,
+    amountDonated: response.data.amount,
+    status: "success",
+  };
+  await Donation.findByIdAndUpdate(donation._id, data);
+
+  await Account.findOneAndUpdate(
+    { ngo: donation.ngo },
+    { $inc: { currentAmount: response.data.amount } },
+    { new: true }
+  );
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: "Donation sucessful",
   });
 });
 
@@ -129,4 +175,5 @@ module.exports = {
   getAllMyDonations,
   getDonationById,
   getDonationsByNgoId,
+  verifyTrans,
 };

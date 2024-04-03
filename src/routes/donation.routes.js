@@ -7,8 +7,6 @@ const {
 
 const router = express.Router();
 
-router.post("/", donationController.createDonation);
-
 router.get(
   "/donors",
   authenticateUser,
@@ -27,6 +25,7 @@ router.get(
   authorizePermissions("admin"),
   donationController.getDonationsByNgoId
 );
+router.post("/:id", donationController.createDonation);
 
 router.get(
   "/:id",

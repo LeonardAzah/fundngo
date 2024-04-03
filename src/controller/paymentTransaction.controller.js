@@ -1,9 +1,8 @@
-const PaymentTransaction = require("../model/PaymentTranscation");
-
 const asyncHandler = require("../util/asyncHandler");
 const StatusCodes = require("http-status-codes");
 const paginate = require("../util/paginate");
 const CustomError = require("../error");
+const paystack = require("../config/paystack");
 
 const getAllPaymentTransactions = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
