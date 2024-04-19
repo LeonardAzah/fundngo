@@ -1,4 +1,4 @@
-const { body, param } = require("express-validator");
+const { body } = require("express-validator");
 
 const createProtfolioValidation = [
   body("mission")
@@ -15,11 +15,7 @@ const createProtfolioValidation = [
   body("project").optional().isArray(),
   body("url").optional().trim().isString(),
 ];
-const getProtfolioByIdValidation = [
-  param("id").isString().notEmpty().withMessage("profile id is required"),
-];
 
 module.exports = {
   createProtfolioValidation,
-  getProtfolioByIdValidation,
 };

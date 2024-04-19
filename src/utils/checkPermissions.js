@@ -1,7 +1,7 @@
-const CustomError = require("../error");
+const CustomError = require("../errors");
 
 const checkPermissions = (requestUser, resourceUserId) => {
-  if (requestUser._id !== resourceUserId) {
+  if (requestUser !== resourceUserId.toSting()) {
     throw new CustomError.UnauthorizedError("Unauthorized to access resource");
   }
 };

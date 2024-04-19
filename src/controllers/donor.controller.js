@@ -1,21 +1,18 @@
-const asyncHandler = require("../util/asyncHandler");
-const User = require("../model/User");
-const CustomError = require("../error");
+const asyncHandler = require("../utils/asyncHandler");
+const User = require("../models/User");
+const CustomError = require("../errors");
 const otpGenerator = require("otp-generator");
-const sendVerificationEmail = require("../util/sendVerificationEmail");
+const sendVerificationEmail = require("../utils/sendVerificationEmail");
 const { StatusCodes } = require("http-status-codes");
-const createHash = require("../util/createHash");
-const paginate = require("../util/paginate");
+const createHash = require("../utils/createHash");
+const paginate = require("../utils/paginate");
 
 const register = asyncHandler(async (req, res) => {
-  const { accountType, name, email, password, confirmPassword } = req.body;
+  const { accountType, name, email, password } = req.body;
 
   const emailAlreadyExists = await User.findOne({ email });
   if (emailAlreadyExists) {
     throw new CustomError.BadRequestError("Email already exists");
-  }
-  if (password !== confirmPassword) {
-    throw new CustomError.BadRequestError("Password  do not match");
   }
 
   const otp = otpGenerator.generate(6, {

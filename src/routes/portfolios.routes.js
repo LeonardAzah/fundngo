@@ -1,6 +1,6 @@
 const express = require("express");
 const validateRequest = require("../middleware/validateRequest");
-const portfolioController = require("../controller/portfolio.controller");
+const portfolioController = require("../controllers/portfolio.controller");
 const { uploads } = require("../config/multer");
 const {
   authenticateUser,
@@ -10,15 +10,16 @@ const {
   createProtfolioValidation,
   getProtfolioByIdValidation,
 } = require("../validators/protfolio.validate");
+const validateId = require("../validators/Id.validate");
 
 const router = express.Router();
 
 router.post(
   "/",
   uploads.array("images", 10),
+  validateRequest(createProtfolioValidation),
   authenticateUser,
   authorizePermissions("ngo"),
-  validateRequest(createProtfolioValidation),
   portfolioController.createPortfolio
 );
 router.post(
@@ -49,7 +50,7 @@ router.patch(
   uploads.array("images", 10),
   authenticateUser,
   authorizePermissions("ngo"),
-  // validateRequest(createProtfolioValidation),
+  validateRequest(createProtfolioValidation),
   portfolioController.updatePortfolio
 );
 
@@ -66,7 +67,7 @@ router.delete(
 );
 router.get(
   "/:id",
-  validateRequest(getProtfolioByIdValidation),
+  validateRequest(validateId),
   portfolioController.getPortfolioById
 );
 

@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 const donationSchema = new mongoose.Schema(
   {
     amount: { type: Number, required: true },
-    donorEmail: String,
-    donorName: String,
+    email: { type: String, required: true },
+    name: { type: String, required: true },
     paystack_ref: {
       type: String,
     },
@@ -12,11 +12,7 @@ const donationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    status: {
-      type: String,
-      enum: ["pending", "success"],
-      default: "pending",
-    },
+
     ngo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

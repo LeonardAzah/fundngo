@@ -1,15 +1,15 @@
-const Donation = require("../model/Donation");
-const User = require("../model/User");
-const Account = require("../model/Account");
-const asyncHandler = require("../util/asyncHandler");
+const Donation = require("../models/Donation");
+const User = require("../models/User");
+const Account = require("../models/Account");
+const asyncHandler = require("../utils/asyncHandler");
 const StatusCodes = require("http-status-codes");
-const paginate = require("../util/paginate");
-const CustomError = require("../error");
+const paginate = require("../utils/paginate");
+const CustomError = require("../errors");
 const paystack = require("../config/paystack");
 
 const createDonation = asyncHandler(async (req, res) => {
   const ngoId = req.params.id;
-  const { userId } = req.user;
+  const user = req.user;
   const ngo = await User.findById(ngoId);
   let amount = req.body.amount;
   if (!ngo) {
@@ -18,8 +18,8 @@ const createDonation = asyncHandler(async (req, res) => {
   req.body.ngo = ngoId;
   let donation;
 
-  if (userId) {
-    req.body.user = userId;
+  if (user != undefined) {
+    req.body.user = user.userId;
     donation = new Donation(req.body);
     await donation.save();
   } else {
@@ -34,11 +34,8 @@ const createDonation = asyncHandler(async (req, res) => {
     email: req.body.email,
   });
 
-  const data = {
-    paystack_ref: response.data.reference,
-  };
-
-  await Donation.findByIdAndUpdate(donation._id, data);
+  donation.paystack_ref = response.data.reference;
+  await donation.save();
 
   const result = {
     donation,
@@ -47,13 +44,13 @@ const createDonation = asyncHandler(async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({
     success: true,
-    message: "Donation created sucessfully",
+    message: "Authorization URL created",
     data: result,
   });
 });
 
 const verifyTrans = asyncHandler(async (req, res) => {
-  const donationId = req.params.id;
+  const { donationId } = req.body;
 
   const donation = await Donation.findById(donationId);
 
@@ -61,32 +58,38 @@ const verifyTrans = asyncHandler(async (req, res) => {
     throw new CustomError.NotFoundError("Donation not found");
   }
 
+  if (donation.paystack_ref == "successs") {
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Transaction has been verified",
+    });
+  }
+
   const response = await paystack.transaction.verify({
     reference: donation.paystack_ref,
   });
 
-  if (response.data.status != "success") {
-    CustomError.CustomAPIError(
-      "Payment failed",
-      StatusCodes.INTERNAL_SERVER_ERROR
-    );
+  if (response.data.status == "success") {
+    const data = {
+      paystack_ref: response.data.status,
+      amountDonated: response.data.amount,
+    };
+    await Donation.findByIdAndUpdate(donation._id, data);
+    const account = await Account.findOne({ ngo: donation.ngo });
+    account.currentAmount += response.data.amount;
+    await account.save();
+    res.status(StatusCodes.OK).json({
+      data: response.data,
+      message: response.message,
+      status: response.status,
+    });
+  } else {
+    return res.status(200).send({
+      data: response.data,
+      message: response.message,
+      status: response.status,
+    });
   }
-  const data = {
-    paystack_ref: response.data.status,
-    amountDonated: response.data.amount,
-    status: "success",
-  };
-  await Donation.findByIdAndUpdate(donation._id, data);
-
-  await Account.findOneAndUpdate(
-    { ngo: donation.ngo },
-    { $inc: { currentAmount: response.data.amount } },
-    { new: true }
-  );
-  res.status(StatusCodes.OK).json({
-    success: true,
-    message: "Donation sucessful",
-  });
 });
 
 const getAllDonations = asyncHandler(async (req, res) => {

@@ -8,7 +8,7 @@ const {
   resetPassword,
   googleCallback,
   changePassword,
-} = require("../controller/auth.controller");
+} = require("../controllers/auth.controller");
 const { authenticateUser } = require("../middleware/authentication");
 const validateRequest = require("../middleware/validateRequest");
 const {
@@ -16,6 +16,7 @@ const {
   verifyEmailValidation,
   forgotPasswordValidation,
   resetPasswordValidation,
+  changePasswordValidation,
 } = require("../validators/auth.validate");
 const router = express.Router();
 
@@ -37,7 +38,12 @@ router.post(
   resetPassword
 );
 
-router.post("/change-password", authenticateUser, changePassword);
+router.post(
+  "/change-password",
+  validateRequest(changePasswordValidation),
+  authenticateUser,
+  changePassword
+);
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })

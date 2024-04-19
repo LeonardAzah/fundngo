@@ -1,16 +1,16 @@
-const User = require("../model/User");
-const Token = require("../model/Token");
-const asyncHandler = require("../util/asyncHandler");
-const CustomError = require("../error");
+const User = require("../models/User");
+const Token = require("../models/Token");
+const asyncHandler = require("../utils/asyncHandler");
+const CustomError = require("../errors");
 const bcrypt = require("bcryptjs");
 const { StatusCodes } = require("http-status-codes");
-const createTokenUser = require("../util/createTokenUser");
-const { attachCookiesToResponse } = require("../util/jwt");
+const createTokenUser = require("../utils/createTokenUser");
+const { attachCookiesToResponse } = require("../utils/jwt");
 const crypto = require("crypto");
 const otpGenerator = require("otp-generator");
-const sendResetPasswordEmail = require("../util/sendResetPasswordEmail");
-const createHash = require("../util/createHash");
-const sendChangePasswordEmail = require("../util/sendChangePasswordEmail");
+const sendResetPasswordEmail = require("../utils/sendResetPasswordEmail");
+const createHash = require("../utils/createHash");
+const sendChangePasswordEmail = require("../utils/sendChangePasswordEmail");
 
 const verifyEmail = asyncHandler(async (req, res) => {
   const { otp, email } = req.body;
@@ -121,11 +121,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 const resetPassword = asyncHandler(async (req, res) => {
-  const { otp, email, password, confirmPassword } = req.body;
-
-  if (password !== confirmPassword) {
-    throw new CustomError.BadRequestError("Password  do not match");
-  }
+  const { otp, email, password } = req.body;
 
   const user = await User.findOne({ email });
 
@@ -144,7 +140,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 });
 
 const changePassword = asyncHandler(async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
+  const { oldPassword, password } = req.body;
   const userId = req.user.userId;
 
   const user = await User.findOne({ _id: userId });
@@ -159,7 +155,7 @@ const changePassword = asyncHandler(async (req, res) => {
     throw new CustomError.UnauthenticatedError("Invalid Credentials");
   }
 
-  user.password = newPassword;
+  user.password = password;
 
   await Token.findOneAndDelete({ user: userId });
 

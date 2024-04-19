@@ -1,5 +1,5 @@
 const express = require("express");
-const paymentTransactionController = require("../controller/paymentTransaction.controller");
+const paymentTransactionController = require("../controllers/paymentTransaction.controller");
 const {
   authenticateUser,
   authorizePermissions,

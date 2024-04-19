@@ -1,7 +1,7 @@
-const asyncHandler = require("../util/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 const StatusCodes = require("http-status-codes");
-const paginate = require("../util/paginate");
-const CustomError = require("../error");
+const paginate = require("../utils/paginate");
+const CustomError = require("../errors");
 const paystack = require("../config/paystack");
 
 const getAllPaymentTransactions = asyncHandler(async (req, res) => {
@@ -16,14 +16,14 @@ const getAllPaymentTransactions = asyncHandler(async (req, res) => {
     },
   ];
 
-  const payments = await paginate({
-    model: PaymentTransaction,
-    page,
-    limit,
-    populateOptions,
-  });
+  // const payments = await paginate({
+  //   model: PaymentTransaction,
+  //   page,
+  //   limit,
+  //   populateOptions,
+  // });
 
-  res.status(StatusCodes.OK).json({
+  const payments = await paystack.res.status(StatusCodes.OK).json({
     success: true,
     message: "Payments fetched sucessfully",
     data: payments,

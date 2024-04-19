@@ -1,4 +1,5 @@
-const logger = require("../util/logger");
+const logger = require("../utils/logger");
+
 const errorHandlerMiddleware = (error, req, res, next) => {
   const customError =
     error.constructor.name === "NodeError" ||

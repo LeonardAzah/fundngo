@@ -1,13 +1,16 @@
-const Portfolio = require("../model/Portfolio");
-const asyncHandler = require("../util/asyncHandler");
+const Portfolio = require("../models/Portfolio");
+const User = require("../models/User");
+const asyncHandler = require("../utils/asyncHandler");
 const StatusCodes = require("http-status-codes");
-const paginate = require("../util/paginate");
-const CustomError = require("../error");
+const paginate = require("../utils/paginate");
+const CustomError = require("../errors");
 const cloudinary = require("../config/cloudinary");
 const fs = require("fs");
 
 const createPortfolio = asyncHandler(async (req, res) => {
   const uploader = async (path) => await cloudinary.uploads(path, "fundngo");
+  const userId = req.user.userId;
+  const user = await User.findById(userId);
 
   const urls = [];
   const files = req.files;
@@ -23,11 +26,14 @@ const createPortfolio = asyncHandler(async (req, res) => {
     req.body.images = urls;
   }
 
-  const userId = req.user.userId;
-  req.body.user = userId;
+  req.body.user = user._id;
 
   const portfolio = new Portfolio(req.body);
   await portfolio.save();
+
+  user.portfolio = portfolio._id;
+  await user.save();
+
   res.status(StatusCodes.CREATED).json({
     success: true,
     message: "Portfolio created sucessfully",
@@ -58,7 +64,7 @@ const getAllVerifiedPortfolios = asyncHandler(async (req, res) => {
   const portfolios = await Portfolio.find()
     .populate({
       path: "user",
-      match: { isValidated: true },
+      match: { status: "approved" },
       select: "name email country state areaOfIntrest",
     })
     .skip(startIndex)
