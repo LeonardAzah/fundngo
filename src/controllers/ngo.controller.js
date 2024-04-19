@@ -1,13 +1,15 @@
-const asyncHandler = require("../util/asyncHandler");
-const User = require("../model/User");
-const CustomError = require("../error");
+const asyncHandler = require("../utils/asyncHandler");
+const User = require("../models/User");
+const Account = require("../models/Account");
+const CustomError = require("../errors");
 const otpGenerator = require("otp-generator");
-const sendVerificationEmail = require("../util/sendVerificationEmail");
+const sendVerificationEmail = require("../utils/sendVerificationEmail");
 const { StatusCodes } = require("http-status-codes");
-const createHash = require("../util/createHash");
+const createHash = require("../utils/createHash");
 const cloudinary = require("../config/cloudinary");
 const fs = require("fs");
-const paginate = require("../util/paginate");
+const paginate = require("../utils/paginate");
+const path = require("path");
 
 const register = asyncHandler(async (req, res) => {
   const {
@@ -49,8 +51,10 @@ const register = asyncHandler(async (req, res) => {
     state,
     role: "ngo",
   });
-
-  await sendVerificationEmail({
+  await Account.create({
+    ngo: user._id,
+  });
+  await await sendVerificationEmail({
     email: user.email,
     otp: otp,
   });
@@ -89,14 +93,23 @@ const getAllNgos = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
 
-  const filters = { accountType: "ngo", status: "pending" };
+  const filters = { accountType: "ngo" };
   excludeFields = "password otp passwordTokenExpirationDate";
+
+  const populateOptions = [
+    {
+      model: "Payment",
+      path: "payment",
+      select: "accountName accountNumber bankName",
+    },
+  ];
   const ngos = await paginate({
     model: User,
     page,
     limit,
     filters,
     excludeFields,
+    populateOptions,
   });
   res.status(StatusCodes.OK).json({
     success: true,
@@ -127,6 +140,22 @@ const getAllVerifiedNgos = asyncHandler(async (req, res) => {
 
 const getNgoById = asyncHandler(async (req, res) => {
   const ngo = await User.findOne({ _id: req.params.id }).select("-password");
+  if (!ngo) {
+    throw new CustomError.NotFoundError("NGO not found");
+  }
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: "NGO fetched sucessfully",
+    data: ngo,
+  });
+});
+const viewNgoById = asyncHandler(async (req, res) => {
+  const ngo = await User.findById(req.params.id)
+    .select("-password -documents -passwordTokenExpirationDate -passwordOtp")
+    .populate({
+      path: "portfolio",
+      select: "mission vision overview projects url images ",
+    });
   if (!ngo) {
     throw new CustomError.NotFoundError("NGO not found");
   }
@@ -167,4 +196,5 @@ module.exports = {
   getAllVerifiedNgos,
   updateNgo,
   getNgoById,
+  viewNgoById,
 };

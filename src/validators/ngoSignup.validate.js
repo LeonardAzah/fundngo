@@ -1,5 +1,6 @@
 const { body } = require("express-validator");
 const { comparePasswords } = require("./donorSignup.validate");
+const validatePassword = require("./validatePassword");
 
 const ngoSignupValidation = [
   body("name").trim().notEmpty().withMessage("Name is required"),
@@ -9,8 +10,7 @@ const ngoSignupValidation = [
   body("password")
     .notEmpty()
     .withMessage("Password is required")
-    .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters long"),
+    .custom(validatePassword),
 
   body("confirmPassword")
     .notEmpty()
@@ -28,4 +28,4 @@ const ngoSignupValidation = [
   body("country").trim().notEmpty().withMessage("Country is required"),
 ];
 
-module.exports = ngoSignupValidation;
+module.exports = { ngoSignupValidation };

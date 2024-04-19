@@ -5,25 +5,23 @@ const {
   getUserById,
   approveVerification,
   declineVerification,
-} = require("../controller/admin.controller");
+} = require("../controllers/admin.controller");
 const validateRequest = require("../middleware/validateRequest");
 const { adminSignupValidation } = require("../validators/adminSignup.validate");
 const {
   authenticateUser,
   authorizePermissions,
 } = require("../middleware/authentication");
+const validateId = require("../validators/Id.validate");
 const router = express.Router();
 
-router.post(
-  "/",
-  // validateRequest(adminSignupValidation),
-  registerAdmin
-);
+router.post("/", validateRequest(adminSignupValidation), registerAdmin);
 
 router.get("/", authenticateUser, authorizePermissions("admin"), getAllUser);
 
 router.patch(
   "/ngo-approved/:id",
+  validateRequest(validateId),
   authenticateUser,
   authorizePermissions("admin"),
   approveVerification
@@ -31,6 +29,7 @@ router.patch(
 
 router.post(
   "/ngo-declined/:id",
+  validateRequest(validateId),
   authenticateUser,
   authorizePermissions("admin"),
   declineVerification
@@ -38,6 +37,7 @@ router.post(
 
 router.get(
   "/:id",
+  validateRequest(validateId),
   authenticateUser,
   authorizePermissions("admin"),
   getUserById

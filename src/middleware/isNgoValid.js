@@ -1,6 +1,6 @@
-const asyncHandler = require("../util/asyncHandler");
-const User = require("../model/User");
-const CustomError = require("../error");
+const asyncHandler = require("../utils/asyncHandler");
+const User = require("../models/User");
+const CustomError = require("../errors");
 
 const isNgoValid = asyncHandler(async (req, res, next) => {
   const { userId } = req.user;

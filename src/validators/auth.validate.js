@@ -1,4 +1,5 @@
 const { body } = require("express-validator");
+const validatePassword = require("./validatePassword");
 const { comparePasswords } = require("./donorSignup.validate");
 
 const loginValidation = [
@@ -27,6 +28,16 @@ const forgotPasswordValidation = [
 
 const resetPasswordValidation = [
   body("email").isEmail().withMessage("Invalid email"),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .custom(validatePassword),
+
+  body("confirmPassword")
+    .notEmpty()
+    .withMessage("Confirm password is required")
+    .custom(comparePasswords),
+
   body("otp")
     .trim()
     .notEmpty()
@@ -34,11 +45,18 @@ const resetPasswordValidation = [
     .isLength({ min: 6 })
     .withMessage("OTP must be at least 6 characters long"),
   ,
-  body("password")
+];
+
+const changePasswordValidation = [
+  body("oldPassword")
     .notEmpty()
-    .withMessage("Password is required")
+    .withMessage("Old password is required")
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters long"),
+  body("password")
+    .notEmpty()
+    .withMessage("new password is required")
+    .custom(validatePassword),
 
   body("confirmPassword")
     .notEmpty()
@@ -51,4 +69,5 @@ module.exports = {
   verifyEmailValidation,
   forgotPasswordValidation,
   resetPasswordValidation,
+  changePasswordValidation,
 };

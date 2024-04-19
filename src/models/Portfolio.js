@@ -18,8 +18,7 @@ const portfolioSchema = new mongoose.Schema(
     },
     projects: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Project",
+        type: [String],
       },
     ],
     url: {

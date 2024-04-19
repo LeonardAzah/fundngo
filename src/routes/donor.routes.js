@@ -4,7 +4,7 @@ const {
   getAllDonors,
   getDonorsById,
   updateDonor,
-} = require("../controller/donor.controller");
+} = require("../controllers/donor.controller");
 const validateRequest = require("../middleware/validateRequest");
 const { donorSignupValidation } = require("../validators/donorSignup.validate");
 const {

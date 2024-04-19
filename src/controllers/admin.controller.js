@@ -1,12 +1,12 @@
-const asyncHandler = require("../util/asyncHandler");
-const User = require("../model/User");
-const CustomError = require("../error");
+const asyncHandler = require("../utils/asyncHandler");
+const User = require("../models/User");
+const CustomError = require("../errors");
 const otpGenerator = require("otp-generator");
 const { StatusCodes } = require("http-status-codes");
-const sendAdminEmail = require("../util/sendAdminEmail");
-const paginate = require("../util/paginate");
-const sendApproveEmail = require("../util/sendApprovedMail");
-const sendDeclineEmail = require("../util/sendDeclineMail ");
+const sendAdminEmail = require("../utils/sendAdminEmail");
+const paginate = require("../utils/paginate");
+const sendApproveEmail = require("../utils/sendApprovedMail");
+const sendDeclineEmail = require("../utils/sendDeclineMail ");
 
 const registerAdmin = asyncHandler(async (req, res) => {
   const { name, email } = req.body;
