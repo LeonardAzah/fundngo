@@ -40,11 +40,6 @@ app.use(express.static("./public"));
 app.use(passport.initialize());
 require("./config/googleAuth")(passport);
 
-app.get("/", (req, res) => {
-  // res.send('<a href="/api/v1/google">Authenticate with google</a>');
-  res.send("fundngo.com");
-});
-
 app.use("/api/v1/donors", donorRoutes);
 app.use("/api/v1/portfolios", portfolioRoutes);
 app.use("/api/v1/donations", donationRoutes);
